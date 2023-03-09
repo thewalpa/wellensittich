@@ -1,3 +1,6 @@
+// Code from bwmarrin on GitHub, thanks for your repository <3
+// https://github.com/bwmarrin/discordgo/blob/master/examples/airhorn/main.go
+
 package assets
 
 import (
