@@ -18,6 +18,19 @@ func (ic *InteractionContext) DefaulInteractionAnswer(message string) error {
 	})
 }
 
+func (ic *InteractionContext) DeferAnswer() error {
+	return ic.Session.InteractionRespond(ic.Interaction.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
+	})
+}
+
+func (ic *InteractionContext) UpdateAnswer(message string) error {
+	_, err := ic.Session.InteractionResponseEdit(ic.Interaction.Interaction, &discordgo.WebhookEdit{
+		Content: &message,
+	})
+	return err
+}
+
 func (ic *InteractionContext) ButtonInteractionAnswer(message string, buttonLabels, buttonsIDs []string) error {
 	actionRowComps := []discordgo.MessageComponent{}
 	buttonComps := []discordgo.MessageComponent{}

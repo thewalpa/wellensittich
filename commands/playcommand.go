@@ -65,10 +65,16 @@ func playCommandHandler(s *discordws.WellensittichSession, i *discordgo.Interact
 		return
 	}
 
+	err = ic.DeferAnswer()
+	if err != nil {
+		fmt.Println("playCommandHandler:", err)
+		return
+	}
+
 	videoInfo, err := ytDlp.GetVideoInfo(ytLink)
 	if err != nil {
 		fmt.Println("playCommandHandler:", err)
-		err := ic.DefaulInteractionAnswer("Could not find the requested play.")
+		err := ic.UpdateAnswer("Could not find the requested play.")
 		if err != nil {
 			fmt.Println("playCommandHandler:", err)
 		}
@@ -79,7 +85,7 @@ func playCommandHandler(s *discordws.WellensittichSession, i *discordgo.Interact
 	vc.VoiceSender.EnqueuePlay(discordws.NewPlay(videoInfo.Title, ytp, videoInfo.Duration))
 
 	// success
-	err = ic.DefaulInteractionAnswer("Successfully enqueued the requested play: " + videoInfo.Title)
+	err = ic.UpdateAnswer("Successfully enqueued the requested play: " + videoInfo.Title)
 	if err != nil {
 		fmt.Println("playCommandHandler:", err)
 	}
