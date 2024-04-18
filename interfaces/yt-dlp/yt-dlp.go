@@ -14,7 +14,7 @@ type VideoInfo struct {
 }
 
 func GetVideoInfo(url string) (VideoInfo, error) {
-	cmd := exec.Command("yt-dlp", "--skip-download", "--print-json", "--flat-playlist", "--format", "wa*", url)
+	cmd := exec.Command("yt-dlp", "--skip-download", "--print-json", "--flat-playlist", "-S", "+size", "--format", "wa*", url)
 	out := bytes.Buffer{}
 	cmd.Stdout = &out
 	err := cmd.Run()
