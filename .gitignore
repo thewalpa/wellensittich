@@ -1,0 +1,11 @@
+config.json
+
+tmp
+testfiles
+*.ogg
+
+build
+assets/ts*
+
+todo
+.VSCodeCounter
