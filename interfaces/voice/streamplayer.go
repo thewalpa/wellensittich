@@ -1,7 +1,6 @@
 package interfaces
 
 import (
-	"fmt"
 	"io"
 
 	"github.com/thewalpa/dca"
@@ -35,7 +34,7 @@ func (ytp *StreamPlayer) Play(sendChan chan []byte, done chan struct{}, stop cha
 		default:
 			opus, err := encodingSession.OpusFrame()
 			if err != nil {
-				fmt.Println(encodingSession.FFMPEGMessages())
+
 				if err == io.EOF {
 					return nil
 				}
