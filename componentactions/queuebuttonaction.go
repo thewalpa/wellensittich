@@ -75,7 +75,7 @@ func (cID customID) queueButtonActionHandler(s *discordws.WellensittichSession, 
 	sb := strings.Builder{}
 	sb.WriteString(header)
 	for i, play := range queueInfo {
-		sb.WriteString(fmt.Sprintf("%d: %s - %s\n", i, play.Name, util.FormatSeconds(play.Length)))
+		sb.WriteString(fmt.Sprintf("%d: %s\n", i, play))
 	}
 	if queueLen > len(queueInfo) {
 		sb.WriteString(fmt.Sprintf("and %d more...", queueLen-len(queueInfo)))

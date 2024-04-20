@@ -18,12 +18,14 @@ func (ic *InteractionContext) DefaulInteractionAnswer(message string) error {
 	})
 }
 
+// send this if your real answer to the interaction can potentially time out (3s)
 func (ic *InteractionContext) DeferAnswer() error {
 	return ic.Session.InteractionRespond(ic.Interaction.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
 	})
 }
 
+// if you deferred your answer before use this to update your answer
 func (ic *InteractionContext) UpdateAnswer(message string) error {
 	_, err := ic.Session.InteractionResponseEdit(ic.Interaction.Interaction, &discordgo.WebhookEdit{
 		Content: &message,
@@ -31,6 +33,8 @@ func (ic *InteractionContext) UpdateAnswer(message string) error {
 	return err
 }
 
+// use this function if you need some simple buttons in your answer
+// there can be only 5 buttons in a row, this function takes care of this and adds new rows if needed
 func (ic *InteractionContext) ButtonInteractionAnswer(message string, buttonLabels, buttonsIDs []string) error {
 	actionRowComps := []discordgo.MessageComponent{}
 	buttonComps := []discordgo.MessageComponent{}

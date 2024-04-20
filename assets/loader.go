@@ -25,8 +25,6 @@ func LoadSoundFile(path string) ([][]byte, error) {
 		// Read opus frame length from dca file.
 		err = binary.Read(file, binary.LittleEndian, &opuslen)
 
-		fmt.Println(opuslen)
-
 		// If this is the end of the file, just return.
 		if err == io.EOF || err == io.ErrUnexpectedEOF {
 			err := file.Close()
