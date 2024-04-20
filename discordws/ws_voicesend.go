@@ -2,16 +2,92 @@ package discordws
 
 import (
 	"fmt"
-	"time"
+	"sync"
 )
 
+type SoundPlayer interface {
+	// needs to return on closing the first channel, optionally on the second
+	Play(sendChan chan []byte, done chan struct{}, stop chan struct{}, pause chan bool, resume chan bool) error
+}
+
+type PlayInfo struct {
+	Name   string //Name to display for play in queue
+	Length uint32 //Length of play in seconds
+}
+
+type Play struct {
+	Sound SoundPlayer
+	PlayInfo
+}
+
+func NewPlay(name string, sound SoundPlayer, length uint32) *Play {
+	return &Play{
+		Sound: sound,
+		PlayInfo: PlayInfo{
+			Name:   name,
+			Length: length,
+		},
+	}
+}
+
+type PlayQueue struct {
+	mu    sync.Mutex
+	queue []*Play
+}
+
+func (pq *PlayQueue) enqueue(p *Play) bool {
+	pq.mu.Lock()
+	defer pq.mu.Unlock()
+	pq.queue = append(pq.queue, p)
+	return true
+}
+
+func (pq *PlayQueue) discardTo(i int) bool {
+	pq.mu.Lock()
+	defer pq.mu.Unlock()
+	if len(pq.queue) <= i {
+		return false
+	}
+	pq.queue = pq.queue[i:]
+	return true
+}
+
+func (pq *PlayQueue) dequeue() (*Play, bool) {
+	pq.mu.Lock()
+	defer pq.mu.Unlock()
+	if len(pq.queue) == 0 {
+		return nil, false
+	}
+	play := pq.queue[0]
+	pq.queue = pq.queue[1:]
+	return play, true
+}
+
+func (pq *PlayQueue) unqueue(i int) bool {
+	pq.mu.Lock()
+	defer pq.mu.Unlock()
+	if i < 1 || len(pq.queue) < i {
+		return false
+	}
+	pq.queue = append(pq.queue[:i], pq.queue[i+1:]...)
+	return true
+}
+
+func (pq *PlayQueue) reset() {
+	pq.mu.Lock()
+	defer pq.mu.Unlock()
+	pq.queue = []*Play{}
+}
+
 type VoiceSender struct {
-	playQueue   *PlayQueue
-	currentPlay *Play
-	done        chan struct{}
-	stop        chan struct{}
-	paused      chan bool // Channel to manage pause state
-	resume      chan bool // Channel to manage resume state
+	playQueue     *PlayQueue
+	currentPlay   *Play
+	done          chan struct{}
+	stop          chan struct{}
+	newPlay       chan struct{}
+	paused        chan bool // Channel to manage pause state
+	resume        chan bool // Channel to manage resume state
+	currentPlayMu sync.Mutex
 }
 
 func NewVoiceSender() *VoiceSender {
@@ -19,6 +95,7 @@ func NewVoiceSender() *VoiceSender {
 		playQueue: &PlayQueue{},
 		done:      make(chan struct{}),
 		stop:      make(chan struct{}),
+		newPlay:   make(chan struct{}, 1),
 		paused:    make(chan bool, 1), // Buffer to prevent blocking
 		resume:    make(chan bool, 1),
 	}
@@ -39,6 +116,7 @@ func (vs *VoiceSender) StopPlaying() {
 
 // skips the current play
 func (vs *VoiceSender) SkipPlay() {
+	vs.currentPlay = nil //prevent race condition
 	close(vs.stop)
 	vs.stop = make(chan struct{})
 }
@@ -110,18 +188,22 @@ func (vs *VoiceSender) Start(wsvc *WellensittichVoiceConnection) {
 				if err != nil {
 					fmt.Println(err)
 				}
-				vs.currentPlay = nil
 			} else {
-				time.Sleep(time.Millisecond * 100) // Sleep briefly to prevent busy looping
+				vs.currentPlay = nil
+				<-vs.newPlay // Wait for new item if the queue is empty
 			}
 		}
 	}
 }
 
 func (vs *VoiceSender) EnqueuePlay(p *Play) error {
-	fmt.Printf("Enqueued a Play\n")
 	if !vs.playQueue.enqueue(p) {
 		return fmt.Errorf("could not add to play queue")
 	}
+	select {
+	case vs.newPlay <- struct{}{}:
+	default:
+	}
+	fmt.Printf("Enqueued a Play\n")
 	return nil
 }
