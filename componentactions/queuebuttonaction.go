@@ -50,7 +50,7 @@ func (cID customID) queueButtonActionHandler(s *discordws.WellensittichSession, 
 	}
 
 	err = vc.VoiceSender.SkipTo(playNum)
-	header := fmt.Sprintf("Successfully skipped to the %d. play. The current queue:\n", playNum)
+	header := fmt.Sprintf("Successfully skipped to the %d. play. The current queue:\n", playNum+1)
 	// we can't skip there, so display current queue and show new buttons
 	if err != nil {
 		header = "The queue is not long enough anymore. Try again:\n"
@@ -75,7 +75,7 @@ func (cID customID) queueButtonActionHandler(s *discordws.WellensittichSession, 
 	sb := strings.Builder{}
 	sb.WriteString(header)
 	for i, play := range queueInfo {
-		sb.WriteString(fmt.Sprintf("%d: %s - %d seconds\n", i, play.Name, play.Length))
+		sb.WriteString(fmt.Sprintf("%d: %s - %s\n", i, play.Name, util.FormatSeconds(play.Length)))
 	}
 	if queueLen > len(queueInfo) {
 		sb.WriteString(fmt.Sprintf("and %d more...", queueLen-len(queueInfo)))

@@ -56,7 +56,7 @@ func queueCommandHandler(s *discordws.WellensittichSession, i *discordgo.Interac
 	sb := strings.Builder{}
 	sb.WriteString("The current queue:\n")
 	for i, play := range queueInfo {
-		sb.WriteString(fmt.Sprintf("%d: %s - %d seconds\n", i, play.Name, play.Length))
+		sb.WriteString(fmt.Sprintf("%d: %s - %s\n", i, play.Name, util.FormatSeconds(play.Length)))
 	}
 	if queueLen > len(queueInfo) {
 		sb.WriteString(fmt.Sprintf("and %d more...", queueLen-len(queueInfo)))
