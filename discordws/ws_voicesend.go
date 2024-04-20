@@ -88,6 +88,7 @@ func (vs *VoiceSender) GetQueueInfo(limit int) ([]util.PlayInfo, int) {
 	info, size := vs.playQueue.GetQueueInfo(limit)
 	if vs.currentPlay != nil {
 		info = append([]util.PlayInfo{vs.currentPlay.PlayInfo}, info...)
+		size++
 	}
 	return info, size
 }
