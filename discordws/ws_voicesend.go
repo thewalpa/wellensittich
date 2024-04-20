@@ -161,10 +161,10 @@ func (vs *VoiceSender) ResumePlaying() {
 func (vs *VoiceSender) GetQueueInfo(limit int) ([]PlayInfo, int) {
 	vs.playQueue.mu.Lock()
 	defer vs.playQueue.mu.Unlock()
-	if vs.currentPlay == nil {
-		return []PlayInfo{}, 0
+	info := []PlayInfo{}
+	if vs.currentPlay != nil {
+		info = []PlayInfo{vs.currentPlay.PlayInfo}
 	}
-	info := []PlayInfo{vs.currentPlay.PlayInfo}
 	for i, p := range vs.playQueue.queue {
 		if i+1 == limit {
 			break
