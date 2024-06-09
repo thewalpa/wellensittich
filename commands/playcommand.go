@@ -68,6 +68,7 @@ func playCommandHandler(s *discordws.WellensittichSession, i *discordgo.Interact
 		}
 		return
 	}
+	searchAnswer := ""
 	if ytLink == "" {
 		if ytQuery != "" {
 			searchresult, err := s.YoutubeMusicProvider.SearchPlay(ytQuery)
@@ -80,6 +81,7 @@ func playCommandHandler(s *discordws.WellensittichSession, i *discordgo.Interact
 				return
 			}
 			ytLink = searchresult.URL
+			searchAnswer = fmt.Sprintf("For your search query >>%s<<\n", ytQuery)
 		}
 	}
 
@@ -105,7 +107,7 @@ func playCommandHandler(s *discordws.WellensittichSession, i *discordgo.Interact
 	vc.VoiceSender.EnqueuePlay(util.NewPlay(videoInfo.Title, ytp, videoInfo.Duration))
 
 	// success
-	err = ic.UpdateAnswer("Successfully enqueued the requested play: " + videoInfo.Title)
+	err = ic.UpdateAnswer(searchAnswer + "Successfully enqueued the requested play: " + videoInfo.Title)
 	if err != nil {
 		fmt.Println("playCommandHandler:", err)
 	}
