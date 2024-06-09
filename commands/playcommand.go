@@ -52,17 +52,35 @@ func playCommandHandler(s *discordws.WellensittichSession, i *discordgo.Interact
 
 	// check input
 	ytLink := ""
+	ytQuery := ""
 	for _, o := range iacd.Options {
 		if o.Name == "link" {
 			ytLink = o.StringValue()
 		}
+		if o.Name == "query" {
+			ytQuery = o.StringValue()
+		}
 	}
-	if !wasPlayRequested(ytLink) {
+	if !wasPlayRequested(ytLink, ytQuery) {
 		err := ic.DefaulInteractionAnswer("No play requested.")
 		if err != nil {
 			fmt.Println("playCommandHandler:", err)
 		}
 		return
+	}
+	if ytLink == "" {
+		if ytQuery != "" {
+			searchresult, err := s.YoutubeMusicProvider.SearchPlay(ytQuery)
+			if err != nil {
+				fmt.Println("playCommandHandler:", err)
+				err = ic.DefaulInteractionAnswer("Could not get results for search query.")
+				if err != nil {
+					fmt.Println("playCommandHandler:", err)
+				}
+				return
+			}
+			ytLink = searchresult.URL
+		}
 	}
 
 	err = ic.DeferAnswer()
@@ -70,6 +88,8 @@ func playCommandHandler(s *discordws.WellensittichSession, i *discordgo.Interact
 		fmt.Println("playCommandHandler:", err)
 		return
 	}
+
+	fmt.Println(ytLink)
 
 	videoInfo, err := ytDlp.GetVideoInfo(ytLink)
 	if err != nil {
@@ -91,6 +111,6 @@ func playCommandHandler(s *discordws.WellensittichSession, i *discordgo.Interact
 	}
 }
 
-func wasPlayRequested(link string) bool {
-	return link != ""
+func wasPlayRequested(link, query string) bool {
+	return link != "" || query != ""
 }

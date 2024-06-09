@@ -107,6 +107,11 @@ func playCommand() *WellensittichCommand {
 					Description: "Specifies a YouTube (or other platform) video link.",
 					Type:        discordgo.ApplicationCommandOptionString,
 				},
+				{
+					Name:        "query",
+					Description: "Specifies a YouTube search query.",
+					Type:        discordgo.ApplicationCommandOptionString,
+				},
 			},
 		},
 		Handler: playCommandHandler,

@@ -2,18 +2,20 @@ package discordws
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/thewalpa/wellensittich/util"
 )
 
 type VoiceSender struct {
-	playQueue   *util.PlayQueue
-	currentPlay *util.Play
-	done        chan struct{}
-	stop        chan struct{}
-	newPlay     chan struct{}
-	paused      chan bool // Channel to manage pause state
-	resume      chan bool // Channel to manage resume state
+	playQueue       *util.PlayQueue
+	currentPlay     *util.Play
+	done            chan struct{}
+	stop            chan struct{}
+	newPlay         chan struct{}
+	paused          chan bool // Channel to manage pause state
+	resume          chan bool // Channel to manage resume state
+	immediatePlayMu sync.Mutex
 }
 
 func NewVoiceSender() *VoiceSender {
@@ -128,6 +130,8 @@ func (vs *VoiceSender) EnqueuePlay(p *util.Play) error {
 }
 
 func (vs *VoiceSender) PlayImmediately(p *util.Play, wsvc *WellensittichVoiceConnection) error {
+	vs.immediatePlayMu.Lock()
+	defer vs.immediatePlayMu.Unlock()
 	vs.PausePlaying()
 	err := p.Sound.Play(wsvc.OpusSend, vs.done, vs.stop, vs.paused, vs.resume)
 	if err != nil {

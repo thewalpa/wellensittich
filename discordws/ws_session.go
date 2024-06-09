@@ -6,6 +6,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/thewalpa/wellensittich/config"
 	gif "github.com/thewalpa/wellensittich/interfaces/gif"
+	musicsearch "github.com/thewalpa/wellensittich/interfaces/musicsearch"
 	speechtotext "github.com/thewalpa/wellensittich/interfaces/speechtotext"
 )
 
@@ -41,6 +42,7 @@ type WellensittichSession struct {
 	// interfaces
 	SpeechToTextProvider speechtotext.SpeechToTextProvider
 	GifProvider          gif.GifProvider
+	YoutubeMusicProvider musicsearch.MusicSearchProvider
 }
 
 func NewWellensittichSession(s *discordgo.Session, wsc config.WellensittichConfig) *WellensittichSession {
@@ -51,6 +53,7 @@ func NewWellensittichSession(s *discordgo.Session, wsc config.WellensittichConfi
 		guildFeatures:        make(map[string]WSGuildFeature),
 		SpeechToTextProvider: speechtotext.NewWhisperAsrWebserviceProvider(wsc.WhisperHost),
 		GifProvider:          gif.NewTenorProvider(wsc.TenorKey),
+		YoutubeMusicProvider: musicsearch.NewYoutubeMusicSearch(wsc.TenorKey),
 	}
 	// register features
 	wss.guildFeatures[TRANSCRIBE_FEATURE_NAME] = NewTranscribeFeature(wss)
