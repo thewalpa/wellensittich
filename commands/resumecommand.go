@@ -38,7 +38,7 @@ func resumeCommandHandler(s *discordws.WellensittichSession, i *discordgo.Intera
 	vc.VoiceSender.ResumePlaying()
 
 	// success
-	err = ic.DefaulInteractionAnswer("Successfully skipped the current play.")
+	err = ic.DefaulInteractionAnswer("Successfully resumed the current play.")
 	if err != nil {
 		fmt.Println("playCommandHandler:", err)
 	}

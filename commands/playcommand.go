@@ -81,7 +81,7 @@ func playCommandHandler(s *discordws.WellensittichSession, i *discordgo.Interact
 				return
 			}
 			ytLink = searchresult.URL
-			searchAnswer = fmt.Sprintf("For your search query >>%s<<\n", ytQuery)
+			searchAnswer = fmt.Sprintf("For your search query: %s\n", ytQuery)
 		}
 	}
 
@@ -90,8 +90,6 @@ func playCommandHandler(s *discordws.WellensittichSession, i *discordgo.Interact
 		fmt.Println("playCommandHandler:", err)
 		return
 	}
-
-	fmt.Println(ytLink)
 
 	videoInfo, err := ytDlp.GetVideoInfo(ytLink)
 	if err != nil {
