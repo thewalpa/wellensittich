@@ -37,7 +37,7 @@ func tsLadyCommandHandler(s *discordws.WellensittichSession, i *discordgo.Intera
 	}
 
 	soundPlayer := interfaces.NewDCAFilePlayer("assets/ts-sounds-dca/greeting.dca")
-	err = vc.VoiceSender.PlayImmediately(util.NewPlay("ts-sounds/greeting", soundPlayer, 0), vc)
+	err = vc.VoiceSender.PlayImmediately(discordws.NewPlay("ts-sounds/greeting", soundPlayer, 0), vc)
 	if err != nil {
 		answer = err.Error()
 	}

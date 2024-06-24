@@ -9,6 +9,10 @@ type InteractionContext struct {
 	Interaction *discordgo.InteractionCreate
 }
 
+func (ic *InteractionContext) GetResponse() (*discordgo.Message, error) {
+	return ic.Session.InteractionResponse(ic.Interaction.Interaction)
+}
+
 func (ic *InteractionContext) DefaulInteractionAnswer(message string) error {
 	return ic.Session.InteractionRespond(ic.Interaction.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,

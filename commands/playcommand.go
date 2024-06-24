@@ -102,7 +102,7 @@ func playCommandHandler(s *discordws.WellensittichSession, i *discordgo.Interact
 	}
 
 	ytp := voice.NewStreamPlayer(videoInfo.Url)
-	vc.VoiceSender.EnqueuePlay(util.NewPlay(videoInfo.Title, ytp, videoInfo.Duration))
+	vc.VoiceSender.EnqueuePlay(discordws.NewPlay(videoInfo.Title, ytp, videoInfo.Duration))
 
 	// success
 	err = ic.UpdateAnswer(searchAnswer + "Successfully enqueued the requested play: " + videoInfo.Title)

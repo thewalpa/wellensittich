@@ -32,6 +32,8 @@ type WellensittichSession struct {
 	// Use instead of discordgo.Session.VoiceConnections because we need VoiceReceiver and VoiceSender
 	WsVoiceConnections map[string]*WellensittichVoiceConnection
 
+	WsPlayQueues map[string]*PlayQueueModel
+
 	// commandMap
 	commandMap         map[string]func(wss *WellensittichSession, i *discordgo.InteractionCreate)
 	componentActionMap map[string]func(wss *WellensittichSession, i *discordgo.InteractionCreate)
@@ -49,6 +51,7 @@ func NewWellensittichSession(s *discordgo.Session, wsc config.WellensittichConfi
 	wss := &WellensittichSession{
 		Session:              s,
 		WsVoiceConnections:   make(map[string]*WellensittichVoiceConnection),
+		WsPlayQueues:         make(map[string]*PlayQueueModel),
 		guildFeatureConfigs:  make(map[string]*guildFeatureConfig),
 		guildFeatures:        make(map[string]WSGuildFeature),
 		SpeechToTextProvider: speechtotext.NewWhisperAsrWebserviceProvider(wsc.WhisperHost),
@@ -87,8 +90,15 @@ func (wss *WellensittichSession) ChannelVoiceJoin(gID, cID string, mute, deaf bo
 	}
 	wss.mu.Lock()
 	defer wss.mu.Unlock()
+	var wspq *PlayQueueModel
+	if wspqVal, ok := wss.WsPlayQueues[gID]; !ok {
+		wspq = NewPlayQueueModel(gID, wss)
+		wss.WsPlayQueues[gID] = wspq
+	} else {
+		wspq = wspqVal
+	}
 	if wsvc, ok := wss.WsVoiceConnections[gID]; !ok {
-		wsvc = NewWellensittichVoiceConnection(gID, wss, vc)
+		wsvc = NewWellensittichVoiceConnection(gID, wss, vc, wspq)
 		wss.WsVoiceConnections[gID] = wsvc
 		// log info
 		//wsvc.LogLevel = 2
@@ -97,6 +107,20 @@ func (wss *WellensittichSession) ChannelVoiceJoin(gID, cID string, mute, deaf bo
 	} else {
 		return wsvc, nil
 	}
+}
+
+func (wss *WellensittichSession) GetPlayQueue(gID string) *PlayQueueModel {
+	wss.mu.Lock()
+	defer wss.mu.Unlock()
+	var wspq *PlayQueueModel
+	if wspqVal, ok := wss.WsPlayQueues[gID]; !ok {
+		wspq = NewPlayQueueModel(gID, wss)
+		wss.WsPlayQueues[gID] = wspq
+	} else {
+		wspq = wspqVal
+	}
+
+	return wspq
 }
 
 func (wss *WellensittichSession) ToggleGuildFeature(featureName, gID, channelID string) (enabled bool, err error) {

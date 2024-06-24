@@ -24,6 +24,17 @@ var Commands = []*WellensittichCommand{
 	resumeCommand(),
 	queueCommand(),
 	removeCommand(),
+	pinMusicCommand(),
+}
+
+func pinMusicCommand() *WellensittichCommand {
+	return &WellensittichCommand{
+		Command: &discordgo.ApplicationCommand{
+			Name:        "pin-music",
+			Description: "WIP: Pins the music view to this channel.",
+		},
+		Handler: pinMusicCommandHandler,
+	}
 }
 
 func removeCommand() *WellensittichCommand {

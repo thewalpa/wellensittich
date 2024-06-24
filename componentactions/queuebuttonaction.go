@@ -56,7 +56,8 @@ func (cID customID) queueButtonActionHandler(s *discordws.WellensittichSession, 
 		header = "The queue is not long enough anymore. Try again:\n"
 	}
 
-	queueInfo, queueLen := vc.VoiceSender.GetQueueInfo(11)
+	wspq := s.GetPlayQueue(g.ID)
+	queueInfo, queueLen := wspq.GetQueueInfo(11)
 	if len(queueInfo) == 0 {
 		err = ic.DefaulInteractionAnswer("Nothing in the queue.")
 		if err != nil {

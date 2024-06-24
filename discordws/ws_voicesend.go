@@ -3,13 +3,12 @@ package discordws
 import (
 	"fmt"
 	"sync"
-
-	"github.com/thewalpa/wellensittich/util"
 )
 
 type VoiceSender struct {
-	playQueue       *util.PlayQueue
-	currentPlay     *util.Play
+	GuildID   string
+	playQueue *PlayQueueModel
+	//currentPlay     *Play
 	done            chan struct{}
 	stop            chan struct{}
 	newPlay         chan struct{}
@@ -18,9 +17,10 @@ type VoiceSender struct {
 	immediatePlayMu sync.Mutex
 }
 
-func NewVoiceSender() *VoiceSender {
+func NewVoiceSender(guildID string, playQueueModel *PlayQueueModel) *VoiceSender {
 	return &VoiceSender{
-		playQueue: &util.PlayQueue{},
+		playQueue: playQueueModel,
+		GuildID:   guildID,
 		done:      make(chan struct{}),
 		stop:      make(chan struct{}),
 		newPlay:   make(chan struct{}, 1),
@@ -44,7 +44,7 @@ func (vs *VoiceSender) StopPlaying() {
 
 // skips the current play
 func (vs *VoiceSender) SkipPlay() {
-	vs.currentPlay = nil //prevent race condition
+	vs.playQueue.currentPlay = nil //prevent race condition
 	close(vs.stop)
 	vs.stop = make(chan struct{})
 }
@@ -86,15 +86,6 @@ func (vs *VoiceSender) ResumePlaying() {
 	}
 }
 
-func (vs *VoiceSender) GetQueueInfo(limit int) ([]util.PlayInfo, int) {
-	info, size := vs.playQueue.GetQueueInfo(limit)
-	if vs.currentPlay != nil {
-		info = append([]util.PlayInfo{vs.currentPlay.PlayInfo}, info...)
-		size++
-	}
-	return info, size
-}
-
 // This will run as long as the VoiceConnection is running
 func (vs *VoiceSender) Start(wsvc *WellensittichVoiceConnection) {
 	fmt.Printf("Starting VoiceSender for %v\n", wsvc.GuildID)
@@ -104,20 +95,20 @@ func (vs *VoiceSender) Start(wsvc *WellensittichVoiceConnection) {
 			return
 		default:
 			if rp, ok := vs.playQueue.Dequeue(); ok {
-				vs.currentPlay = rp
+				vs.playQueue.currentPlay = rp
 				err := rp.Sound.Play(wsvc.OpusSend, vs.done, vs.stop, vs.paused, vs.resume)
 				if err != nil {
 					fmt.Println(err)
 				}
 			} else {
-				vs.currentPlay = nil
+				vs.playQueue.currentPlay = nil
 				<-vs.newPlay // Wait for new item if the queue is empty
 			}
 		}
 	}
 }
 
-func (vs *VoiceSender) EnqueuePlay(p *util.Play) error {
+func (vs *VoiceSender) EnqueuePlay(p *Play) error {
 	if !vs.playQueue.Enqueue(p) {
 		return fmt.Errorf("could not add to play queue")
 	}
@@ -129,7 +120,7 @@ func (vs *VoiceSender) EnqueuePlay(p *util.Play) error {
 	return nil
 }
 
-func (vs *VoiceSender) PlayImmediately(p *util.Play, wsvc *WellensittichVoiceConnection) error {
+func (vs *VoiceSender) PlayImmediately(p *Play, wsvc *WellensittichVoiceConnection) error {
 	vs.immediatePlayMu.Lock()
 	defer vs.immediatePlayMu.Unlock()
 	vs.PausePlaying()
