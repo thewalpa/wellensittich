@@ -2,18 +2,28 @@ package discordws
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/thewalpa/wellensittich/util"
 )
 
 type PlayQueueView struct {
 	ChannelID string
 	MessageID string
 	session   *WellensittichSession
-	i         int
+	ic        *util.InteractionContext
 }
 
-func (pq *PlayQueueView) Update() {
+func NewPlayQueue(wss *WellensittichSession) *PlayQueueView {
+	return &PlayQueueView{
+		session: wss,
+	}
+}
+
+func (pq *PlayQueueView) Update(pqm *PlayQueueModel) {
+	fmt.Println("looping?")
 	if pq.session == nil || pq.ChannelID == "" || pq.MessageID == "" {
 		return
 	}
@@ -22,25 +32,43 @@ func (pq *PlayQueueView) Update() {
 		fmt.Println(err)
 		return
 	}
-	message.Content = fmt.Sprintf("this was edited %d", pq.i)
-	pq.i++
-	messageEdit := discordgo.NewMessageEdit(pq.ChannelID, pq.MessageID)
-	messageEdit.SetContent(message.Content)
-	messageEdit.SetEmbeds(message.Embeds)
-	_, err = pq.session.ChannelMessageEditComplex(messageEdit)
+	messageEdit := &discordgo.WebhookEdit{} //discordgo.NewMessageEdit(pq.ChannelID, pq.MessageID)
+	if message.Content == "" {
+		message.Content = "Hier könnte Ihre Werbung stehen!"
+	}
+	messageEdit.Content = &message.Content //SetContent(message.Content)
+	queueInfo, queueLen := pqm.GetQueueInfo(11)
+	if len(queueInfo) != 0 {
+		// get buttIDs from helper function
+		//buttIDs := util.QueueButtonsCustomIDs()
+		// create button labels 1 to n
+		buttLabels := make([]string, len(queueInfo)-1)
+		for i := range len(buttLabels) {
+			buttLabels[i] = strconv.Itoa(i + 1)
+		}
+		sb := strings.Builder{}
+		sb.WriteString("The current queue:\n")
+		for i, play := range queueInfo {
+			sb.WriteString(fmt.Sprintf("%d: %s\n", i, play))
+		}
+		if queueLen > len(queueInfo) {
+			sb.WriteString(fmt.Sprintf("and %d more...", queueLen-len(queueInfo)))
+		}
+		queueEmbed := pq.queueEmbed((sb.String()))
+		messageEdit.Embeds = &[]*discordgo.MessageEmbed{&queueEmbed}
+	}
+	err = pq.ic.UpdateAnswerComplex(messageEdit)
 	if err != nil {
 		fmt.Println(err)
 	}
 }
 
-func (pq *PlayQueueView) Embed(content string) discordgo.MessageEmbed {
+func (pq *PlayQueueView) queueEmbed(content string) discordgo.MessageEmbed {
 	return discordgo.MessageEmbed{
-		Type:        discordgo.EmbedTypeRich,
-		Title:       "Wellensittich Play Queue",
-		Description: "test",
+		Type:  discordgo.EmbedTypeRich,
+		Title: "Play Queue",
 		Fields: []*discordgo.MessageEmbedField{
 			{
-				Name:  "test",
 				Value: content,
 			},
 		},

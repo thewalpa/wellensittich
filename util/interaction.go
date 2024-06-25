@@ -13,6 +13,13 @@ func (ic *InteractionContext) GetResponse() (*discordgo.Message, error) {
 	return ic.Session.InteractionResponse(ic.Interaction.Interaction)
 }
 
+func (ic *InteractionContext) GeneralInteractionAnswer(data *discordgo.InteractionResponseData) error {
+	return ic.Session.InteractionRespond(ic.Interaction.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: data,
+	})
+}
+
 func (ic *InteractionContext) DefaulInteractionAnswer(message string) error {
 	return ic.Session.InteractionRespond(ic.Interaction.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -34,6 +41,11 @@ func (ic *InteractionContext) UpdateAnswer(message string) error {
 	_, err := ic.Session.InteractionResponseEdit(ic.Interaction.Interaction, &discordgo.WebhookEdit{
 		Content: &message,
 	})
+	return err
+}
+
+func (ic *InteractionContext) UpdateAnswerComplex(messageEdit *discordgo.WebhookEdit) error {
+	_, err := ic.Session.InteractionResponseEdit(ic.Interaction.Interaction, messageEdit)
 	return err
 }
 
