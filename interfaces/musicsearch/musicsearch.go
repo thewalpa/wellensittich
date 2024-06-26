@@ -6,5 +6,5 @@ type MusicSearchResult struct {
 }
 
 type MusicSearchProvider interface {
-	SearchPlay(string) (MusicSearchResult, error)
+	SearchPlay(string, ...string) (MusicSearchResult, error)
 }

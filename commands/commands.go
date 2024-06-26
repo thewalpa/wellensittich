@@ -113,15 +113,31 @@ func playCommand() *WellensittichCommand {
 			Name:        "play",
 			Description: "WIP: Enqueue a play.",
 			Options: []*discordgo.ApplicationCommandOption{
+				// {
+				// 	Name:        "link",
+				// 	Description: "Specifies a YouTube (or other platform) video link.",
+				// 	Type:        discordgo.ApplicationCommandOptionString,
+				// },
 				{
-					Name:        "link",
-					Description: "Specifies a YouTube (or other platform) video link.",
+					Name:        "query",
+					Description: "Specifies the query.",
 					Type:        discordgo.ApplicationCommandOptionString,
 				},
 				{
-					Name:        "query",
-					Description: "Specifies a YouTube search query.",
+					Name:        "help",
+					Description: "Explains the rules for the query option.",
+					Type:        discordgo.ApplicationCommandOptionBoolean,
+				},
+				{
+					Name:        "type",
+					Description: "Explicity define the type of query.",
 					Type:        discordgo.ApplicationCommandOptionString,
+					Choices: []*discordgo.ApplicationCommandOptionChoice{
+						{Name: LINK, Value: LINK},
+						{Name: YT_PLAYLIST, Value: YT_PLAYLIST},
+						{Name: YT_SEARCH, Value: YT_SEARCH},
+						{Name: YT_MUSIC_SEARCH, Value: YT_MUSIC_SEARCH},
+					},
 				},
 			},
 		},

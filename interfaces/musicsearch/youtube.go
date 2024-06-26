@@ -26,8 +26,16 @@ func NewYoutubeMusicSearch(api_key string) *YoutubeMusicSearch {
 	}
 }
 
-func (yts *YoutubeMusicSearch) SearchPlay(query string) (MusicSearchResult, error) {
-	url := "https://youtube.googleapis.com/youtube/v3/search" + fmt.Sprintf("?part=snippet&videoCategoryId=10&type=video&q=%v&key=%v", url.QueryEscape(query), yts.api_key)
+func (yts *YoutubeMusicSearch) SearchPlay(query string, options ...string) (MusicSearchResult, error) {
+	// default is 10 for music
+	videoCategoryId := "&videoCategoryId=10"
+	for _, o := range options {
+		if o == "generic" {
+			videoCategoryId = ""
+		}
+	}
+	// youtube search API with some args
+	url := "https://youtube.googleapis.com/youtube/v3/search" + fmt.Sprintf("?part=snippet%s&type=video&q=%v&key=%v", videoCategoryId, url.QueryEscape(query), yts.api_key)
 	response, err := http.Get(url)
 	if err != nil {
 		return MusicSearchResult{}, err
