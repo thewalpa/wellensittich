@@ -44,7 +44,7 @@ func (vs *VoiceSender) StopPlaying() {
 
 // skips the current play
 func (vs *VoiceSender) SkipPlay() {
-	vs.playQueue.currentPlay = nil //prevent race condition
+	vs.playQueue.SetCurrentPlay(nil) //prevent race condition
 	close(vs.stop)
 	vs.stop = make(chan struct{})
 }
@@ -95,13 +95,13 @@ func (vs *VoiceSender) Start(wsvc *WellensittichVoiceConnection) {
 			return
 		default:
 			if rp, ok := vs.playQueue.Dequeue(); ok {
-				vs.playQueue.currentPlay = rp
+				vs.playQueue.SetCurrentPlay(rp)
 				err := rp.Sound.Play(wsvc.OpusSend, vs.done, vs.stop, vs.paused, vs.resume)
 				if err != nil {
 					fmt.Println(err)
 				}
 			} else {
-				vs.playQueue.currentPlay = nil
+				vs.playQueue.SetCurrentPlay(nil)
 				<-vs.newPlay // Wait for new item if the queue is empty
 			}
 		}

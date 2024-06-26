@@ -22,6 +22,19 @@ func NewPlayQueueModel(guildID string, wss *WellensittichSession) *PlayQueueMode
 	}
 }
 
+func (mpq *PlayQueueModel) GetCurrentPlay() *Play {
+	mpq.mu.Lock()
+	defer mpq.mu.Unlock()
+	return mpq.currentPlay
+}
+
+func (mpq *PlayQueueModel) SetCurrentPlay(currentPlay *Play) {
+	mpq.mu.Lock()
+	defer mpq.mu.Unlock()
+	mpq.currentPlay = currentPlay
+	go mpq.updateView()
+}
+
 func (mpq *PlayQueueModel) UpdateMessage(ic *util.InteractionContext) {
 	mess, err := ic.GetResponse()
 	if err != nil {
