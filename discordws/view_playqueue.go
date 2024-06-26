@@ -32,7 +32,7 @@ func (pq *PlayQueueView) Update(pqm *PlayQueueModel) {
 		fmt.Println(err)
 		return
 	}
-	messageEdit := &discordgo.WebhookEdit{} //discordgo.NewMessageEdit(pq.ChannelID, pq.MessageID)
+	messageEdit := discordgo.NewMessageEdit(pq.ChannelID, pq.MessageID)
 	if message.Content == "" {
 		message.Content = "Hier könnte Ihre Werbung stehen!"
 	}
@@ -57,7 +57,7 @@ func (pq *PlayQueueView) Update(pqm *PlayQueueModel) {
 		queueEmbed := pq.queueEmbed((sb.String()))
 		messageEdit.Embeds = &[]*discordgo.MessageEmbed{&queueEmbed}
 	}
-	err = pq.ic.UpdateAnswerComplex(messageEdit)
+	err = pq.ic.UpdateMessageComplex(messageEdit)
 	if err != nil {
 		fmt.Println(err)
 	}

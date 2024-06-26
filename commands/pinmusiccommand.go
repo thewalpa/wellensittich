@@ -18,7 +18,7 @@ func pinMusicCommandHandler(s *discordws.WellensittichSession, i *discordgo.Inte
 	}
 
 	wspq := s.GetPlayQueue(g.ID)
-	err = ic.DeferAnswer()
+	err = ic.DefaulInteractionAnswer("loading...")
 	if err != nil {
 		fmt.Println("queueCommandHandler:", err)
 		return

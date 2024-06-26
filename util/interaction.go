@@ -49,6 +49,11 @@ func (ic *InteractionContext) UpdateAnswerComplex(messageEdit *discordgo.Webhook
 	return err
 }
 
+func (ic *InteractionContext) UpdateMessageComplex(messageEdit *discordgo.MessageEdit) error {
+	_, err := ic.Session.ChannelMessageEditComplex(messageEdit)
+	return err
+}
+
 // use this function if you need some simple buttons in your answer
 // there can be only 5 buttons in a row, this function takes care of this and adds new rows if needed
 func (ic *InteractionContext) ButtonInteractionAnswer(message string, buttonLabels, buttonsIDs []string) error {
