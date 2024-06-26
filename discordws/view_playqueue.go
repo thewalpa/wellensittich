@@ -33,10 +33,8 @@ func (pq *PlayQueueView) Update(pqm *PlayQueueModel) {
 		return
 	}
 	messageEdit := discordgo.NewMessageEdit(pq.ChannelID, pq.MessageID)
-	if message.Content == "" {
-		message.Content = "Hier könnte Ihre Werbung stehen!"
-	}
-	messageEdit.Content = &message.Content //SetContent(message.Content)
+	message.Content = "Hier könnte Ihre Werbung stehen!"
+	messageEdit.SetContent(message.Content)
 	queueInfo, queueLen := pqm.GetQueueInfo(11)
 	if len(queueInfo) != 0 {
 		// get buttIDs from helper function
@@ -55,7 +53,7 @@ func (pq *PlayQueueView) Update(pqm *PlayQueueModel) {
 			sb.WriteString(fmt.Sprintf("and %d more...", queueLen-len(queueInfo)))
 		}
 		queueEmbed := pq.queueEmbed((sb.String()))
-		messageEdit.Embeds = &[]*discordgo.MessageEmbed{&queueEmbed}
+		messageEdit.SetEmbeds([]*discordgo.MessageEmbed{&queueEmbed})
 	}
 	err = pq.ic.UpdateMessageComplex(messageEdit)
 	if err != nil {
