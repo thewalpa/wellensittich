@@ -23,7 +23,6 @@ func NewPlayQueue(wss *WellensittichSession) *PlayQueueView {
 }
 
 func (pq *PlayQueueView) Update(pqm *PlayQueueModel) {
-	fmt.Println("looping?")
 	if pq.session == nil || pq.ChannelID == "" || pq.MessageID == "" {
 		return
 	}
@@ -54,6 +53,8 @@ func (pq *PlayQueueView) Update(pqm *PlayQueueModel) {
 		}
 		queueEmbed := pq.queueEmbed((sb.String()))
 		messageEdit.SetEmbeds([]*discordgo.MessageEmbed{&queueEmbed})
+	} else {
+		messageEdit.SetEmbeds(nil)
 	}
 	err = pq.ic.UpdateMessageComplex(messageEdit)
 	if err != nil {
