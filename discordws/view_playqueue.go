@@ -54,7 +54,7 @@ func (pq *PlayQueueView) Update(pqm *PlayQueueModel) {
 		queueEmbed := pq.queueEmbed((sb.String()))
 		messageEdit.SetEmbeds([]*discordgo.MessageEmbed{&queueEmbed})
 	} else {
-		messageEdit.SetEmbeds(nil)
+		messageEdit.SetEmbeds([]*discordgo.MessageEmbed{})
 	}
 	err = pq.ic.UpdateMessageComplex(messageEdit)
 	if err != nil {
