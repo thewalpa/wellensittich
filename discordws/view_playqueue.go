@@ -22,7 +22,7 @@ func NewPlayQueue(wss *WellensittichSession) *PlayQueueView {
 	}
 }
 
-func (pq *PlayQueueView) Update(pqm *PlayQueueModel) {
+func (pq *PlayQueueView) Update(pqm *PlayQueue) {
 	if pq.session == nil || pq.ChannelID == "" || pq.MessageID == "" {
 		return
 	}
@@ -37,7 +37,7 @@ func (pq *PlayQueueView) Update(pqm *PlayQueueModel) {
 	queueInfo, queueLen := pqm.GetQueueInfo(11)
 	if len(queueInfo) != 0 {
 		// get buttIDs from helper function
-		//buttIDs := util.QueueButtonsCustomIDs()
+		buttIDs := util.QueueButtonsCustomIDs()
 		// create button labels 1 to n
 		buttLabels := make([]string, len(queueInfo)-1)
 		for i := range len(buttLabels) {
@@ -53,6 +53,7 @@ func (pq *PlayQueueView) Update(pqm *PlayQueueModel) {
 		}
 		queueEmbed := pq.queueEmbed((sb.String()))
 		messageEdit.SetEmbeds([]*discordgo.MessageEmbed{&queueEmbed})
+		messageEdit.Components = util.ActionRowComps(buttLabels, buttIDs[:len(buttLabels)])
 	} else {
 		messageEdit.SetEmbeds([]*discordgo.MessageEmbed{})
 	}

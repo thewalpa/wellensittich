@@ -6,6 +6,8 @@ import (
 	"github.com/thewalpa/wellensittich/util"
 )
 
+type customID string
+
 type WellensittichComponentAction struct {
 	CustomID string
 	Handler  func(s *discordws.WellensittichSession, i *discordgo.InteractionCreate)

@@ -32,7 +32,7 @@ type WellensittichSession struct {
 	// Use instead of discordgo.Session.VoiceConnections because we need VoiceReceiver and VoiceSender
 	WsVoiceConnections map[string]*WellensittichVoiceConnection
 
-	WsPlayQueues map[string]*PlayQueueModel
+	WsPlayQueues map[string]*PlayQueue
 
 	// commandMap
 	commandMap         map[string]func(wss *WellensittichSession, i *discordgo.InteractionCreate)
@@ -51,7 +51,7 @@ func NewWellensittichSession(s *discordgo.Session, wsc config.WellensittichConfi
 	wss := &WellensittichSession{
 		Session:              s,
 		WsVoiceConnections:   make(map[string]*WellensittichVoiceConnection),
-		WsPlayQueues:         make(map[string]*PlayQueueModel),
+		WsPlayQueues:         make(map[string]*PlayQueue),
 		guildFeatureConfigs:  make(map[string]*guildFeatureConfig),
 		guildFeatures:        make(map[string]WSGuildFeature),
 		SpeechToTextProvider: speechtotext.NewWhisperAsrWebserviceProvider(wsc.WhisperHost),
@@ -90,7 +90,7 @@ func (wss *WellensittichSession) ChannelVoiceJoin(gID, cID string, mute, deaf bo
 	}
 	wss.mu.Lock()
 	defer wss.mu.Unlock()
-	var wspq *PlayQueueModel
+	var wspq *PlayQueue
 	if wspqVal, ok := wss.WsPlayQueues[gID]; !ok {
 		wspq = NewPlayQueueModel(gID, wss)
 		wss.WsPlayQueues[gID] = wspq
@@ -109,10 +109,10 @@ func (wss *WellensittichSession) ChannelVoiceJoin(gID, cID string, mute, deaf bo
 	}
 }
 
-func (wss *WellensittichSession) GetPlayQueue(gID string) *PlayQueueModel {
+func (wss *WellensittichSession) GetPlayQueue(gID string) *PlayQueue {
 	wss.mu.Lock()
 	defer wss.mu.Unlock()
-	var wspq *PlayQueueModel
+	var wspq *PlayQueue
 	if wspqVal, ok := wss.WsPlayQueues[gID]; !ok {
 		wspq = NewPlayQueueModel(gID, wss)
 		wss.WsPlayQueues[gID] = wspq

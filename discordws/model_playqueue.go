@@ -7,7 +7,7 @@ import (
 	"github.com/thewalpa/wellensittich/util"
 )
 
-type PlayQueueModel struct {
+type PlayQueue struct {
 	GuildID     string
 	View        *PlayQueueView
 	mu          sync.Mutex
@@ -15,47 +15,49 @@ type PlayQueueModel struct {
 	currentPlay *Play
 }
 
-func NewPlayQueueModel(guildID string, wss *WellensittichSession) *PlayQueueModel {
-	return &PlayQueueModel{
+func NewPlayQueueModel(guildID string, wss *WellensittichSession) *PlayQueue {
+	return &PlayQueue{
 		GuildID: guildID,
 		View:    NewPlayQueue(wss),
 	}
 }
 
-func (mpq *PlayQueueModel) GetCurrentPlay() *Play {
+func (mpq *PlayQueue) GetCurrentPlay() *Play {
 	mpq.mu.Lock()
 	defer mpq.mu.Unlock()
 	return mpq.currentPlay
 }
 
-func (mpq *PlayQueueModel) SetCurrentPlay(currentPlay *Play) {
+func (mpq *PlayQueue) SetCurrentPlay(currentPlay *Play) {
 	mpq.mu.Lock()
 	defer mpq.mu.Unlock()
 	mpq.currentPlay = currentPlay
 	go mpq.updateView()
 }
 
-func (mpq *PlayQueueModel) UpdateMessage(ic *util.InteractionContext) {
+func (mpq *PlayQueue) UpdateMessage(ic *util.InteractionContext) {
 	mess, err := ic.GetResponse()
 	if err != nil {
 		fmt.Println("PlayQueueModel/UpdateMessage:", err)
 		return
 	}
+	if mpq.View.session != nil && mpq.View.MessageID != "" && mpq.View.ChannelID != "" {
+		go mpq.View.session.ChannelMessageDelete(mpq.View.ChannelID, mpq.View.MessageID)
+	}
 	mpq.View.MessageID = mess.ID
 	mpq.View.ChannelID = mess.ChannelID
 	mpq.View.ic = ic
 	mpq.updateView()
-
 }
 
-func (mpq *PlayQueueModel) updateView() {
+func (mpq *PlayQueue) updateView() {
 	if mpq.View == nil {
 		return
 	}
 	mpq.View.Update(mpq)
 }
 
-func (mpq *PlayQueueModel) GetQueueInfo(limit int) ([]util.PlayInfo, int) {
+func (mpq *PlayQueue) GetQueueInfo(limit int) ([]util.PlayInfo, int) {
 	mpq.mu.Lock()
 	defer mpq.mu.Unlock()
 	info := []util.PlayInfo{}
@@ -73,7 +75,7 @@ func (mpq *PlayQueueModel) GetQueueInfo(limit int) ([]util.PlayInfo, int) {
 	return info, size
 }
 
-func (mpq *PlayQueueModel) Enqueue(p *Play) bool {
+func (mpq *PlayQueue) Enqueue(p *Play) bool {
 	defer mpq.updateView()
 	mpq.mu.Lock()
 	defer mpq.mu.Unlock()
@@ -81,7 +83,7 @@ func (mpq *PlayQueueModel) Enqueue(p *Play) bool {
 	return true
 }
 
-func (mpq *PlayQueueModel) DiscardTo(i int) bool {
+func (mpq *PlayQueue) DiscardTo(i int) bool {
 	mpq.mu.Lock()
 	defer mpq.mu.Unlock()
 	if len(mpq.queue) <= i {
@@ -92,7 +94,7 @@ func (mpq *PlayQueueModel) DiscardTo(i int) bool {
 	return true
 }
 
-func (mpq *PlayQueueModel) Dequeue() (*Play, bool) {
+func (mpq *PlayQueue) Dequeue() (*Play, bool) {
 	mpq.mu.Lock()
 	defer mpq.mu.Unlock()
 	if len(mpq.queue) == 0 {
@@ -104,7 +106,7 @@ func (mpq *PlayQueueModel) Dequeue() (*Play, bool) {
 	return play, true
 }
 
-func (mpq *PlayQueueModel) Unqueue(i int) bool {
+func (mpq *PlayQueue) Unqueue(i int) bool {
 	mpq.mu.Lock()
 	defer mpq.mu.Unlock()
 	if i < 1 || len(mpq.queue) < i {
@@ -115,7 +117,7 @@ func (mpq *PlayQueueModel) Unqueue(i int) bool {
 	return true
 }
 
-func (mpq *PlayQueueModel) Reset() {
+func (mpq *PlayQueue) Reset() {
 	defer mpq.updateView()
 	mpq.mu.Lock()
 	defer mpq.mu.Unlock()

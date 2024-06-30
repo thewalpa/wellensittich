@@ -21,7 +21,7 @@ type WellensittichVoiceConnection struct {
 	mu           sync.Mutex
 }
 
-func NewWellensittichVoiceConnection(gID string, wss *WellensittichSession, vc *discordgo.VoiceConnection, wspq *PlayQueueModel) *WellensittichVoiceConnection {
+func NewWellensittichVoiceConnection(gID string, wss *WellensittichSession, vc *discordgo.VoiceConnection, wspq *PlayQueue) *WellensittichVoiceConnection {
 	return &WellensittichVoiceConnection{
 		VoiceConnection: vc,
 		VoiceSender:     NewVoiceSender(gID, wspq),

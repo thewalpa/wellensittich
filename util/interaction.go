@@ -57,6 +57,17 @@ func (ic *InteractionContext) UpdateMessageComplex(messageEdit *discordgo.Messag
 // use this function if you need some simple buttons in your answer
 // there can be only 5 buttons in a row, this function takes care of this and adds new rows if needed
 func (ic *InteractionContext) ButtonInteractionAnswer(message string, buttonLabels, buttonsIDs []string) error {
+	actionRowComps := ActionRowComps(buttonLabels, buttonsIDs)
+	return ic.Session.InteractionRespond(ic.Interaction.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Content:    message,
+			Components: *actionRowComps,
+		},
+	})
+}
+
+func ActionRowComps(buttonLabels, buttonsIDs []string) *[]discordgo.MessageComponent {
 	actionRowComps := []discordgo.MessageComponent{}
 	buttonComps := []discordgo.MessageComponent{}
 	for i, bStr := range buttonsIDs {
@@ -76,11 +87,5 @@ func (ic *InteractionContext) ButtonInteractionAnswer(message string, buttonLabe
 			buttonComps = []discordgo.MessageComponent{}
 		}
 	}
-	return ic.Session.InteractionRespond(ic.Interaction.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Content:    message,
-			Components: actionRowComps,
-		},
-	})
+	return &actionRowComps
 }

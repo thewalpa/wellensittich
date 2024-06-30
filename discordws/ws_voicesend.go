@@ -7,7 +7,7 @@ import (
 
 type VoiceSender struct {
 	GuildID   string
-	playQueue *PlayQueueModel
+	playQueue *PlayQueue
 	//currentPlay     *Play
 	done            chan struct{}
 	stop            chan struct{}
@@ -17,7 +17,7 @@ type VoiceSender struct {
 	immediatePlayMu sync.Mutex
 }
 
-func NewVoiceSender(guildID string, playQueueModel *PlayQueueModel) *VoiceSender {
+func NewVoiceSender(guildID string, playQueueModel *PlayQueue) *VoiceSender {
 	return &VoiceSender{
 		playQueue: playQueueModel,
 		GuildID:   guildID,
