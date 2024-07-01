@@ -38,7 +38,7 @@ func queueCommandHandler(s *discordws.WellensittichSession, i *discordgo.Interac
 	}
 
 	wspq := s.GetPlayQueue(g.ID)
-	queueInfo, queueLen := wspq.GetQueueInfo(11)
+	queueInfo, queueLen := wspq.GetQueueInfo(11, false)
 	if len(queueInfo) == 0 {
 		err = ic.DefaulInteractionAnswer("Nothing in the queue.")
 		if err != nil {

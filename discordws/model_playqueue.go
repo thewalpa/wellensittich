@@ -8,11 +8,16 @@ import (
 )
 
 type PlayQueue struct {
-	GuildID     string
-	View        *PlayQueueView
-	mu          sync.Mutex
+	GuildID string
+	View    *PlayQueueView
+	mu      sync.Mutex
+	PlayQueueModel
+}
+
+type PlayQueueModel struct {
 	queue       []*Play
 	currentPlay *Play
+	startIdx    int
 }
 
 func NewPlayQueueModel(guildID string, wss *WellensittichSession) *PlayQueue {
@@ -20,6 +25,12 @@ func NewPlayQueueModel(guildID string, wss *WellensittichSession) *PlayQueue {
 		GuildID: guildID,
 		View:    NewPlayQueue(wss),
 	}
+}
+
+func (mpq *PlayQueue) GetStartIdx() int {
+	mpq.mu.Lock()
+	defer mpq.mu.Unlock()
+	return mpq.startIdx
 }
 
 func (mpq *PlayQueue) GetCurrentPlay() *Play {
@@ -33,6 +44,30 @@ func (mpq *PlayQueue) SetCurrentPlay(currentPlay *Play) {
 	defer mpq.mu.Unlock()
 	mpq.currentPlay = currentPlay
 	go mpq.updateView()
+}
+
+func (mpq *PlayQueue) MoveQueueViewForwards() bool {
+	mpq.mu.Lock()
+	defer mpq.mu.Unlock()
+	newIdx := mpq.startIdx + 10
+	if newIdx >= len(mpq.queue) {
+		return false
+	}
+	defer func() { go mpq.updateView() }()
+	mpq.startIdx = newIdx
+	return true
+}
+
+func (mpq *PlayQueue) MoveQueueViewBackwards() bool {
+	mpq.mu.Lock()
+	defer mpq.mu.Unlock()
+	newIdx := mpq.startIdx - 10
+	if newIdx < 0 {
+		return false
+	}
+	defer func() { go mpq.updateView() }()
+	mpq.startIdx = newIdx
+	return true
 }
 
 func (mpq *PlayQueue) UpdateMessage(ic *util.InteractionContext) {
@@ -57,17 +92,21 @@ func (mpq *PlayQueue) updateView() {
 	mpq.View.Update(mpq)
 }
 
-func (mpq *PlayQueue) GetQueueInfo(limit int) ([]util.PlayInfo, int) {
+func (mpq *PlayQueue) GetQueueInfo(limit int, useStartIdx bool) ([]util.PlayInfo, int) {
 	mpq.mu.Lock()
 	defer mpq.mu.Unlock()
+	startIdx := 0
+	if useStartIdx {
+		startIdx = mpq.startIdx
+	}
 	info := []util.PlayInfo{}
-	for i, p := range mpq.queue {
+	for i, p := range mpq.queue[startIdx:] {
 		if i+1 == limit {
 			break
 		}
 		info = append(info, p.PlayInfo)
 	}
-	size := len(mpq.queue)
+	size := len(mpq.queue) - startIdx
 	if mpq.currentPlay != nil {
 		info = append([]util.PlayInfo{mpq.currentPlay.PlayInfo}, info...)
 		size++
@@ -83,14 +122,21 @@ func (mpq *PlayQueue) Enqueue(p *Play) bool {
 	return true
 }
 
-func (mpq *PlayQueue) DiscardTo(i int) bool {
+func (mpq *PlayQueue) DiscardTo(i int, useStartIdx bool) bool {
 	mpq.mu.Lock()
 	defer mpq.mu.Unlock()
-	if len(mpq.queue) <= i {
+	startIdx := 0
+	if useStartIdx {
+		startIdx = mpq.startIdx
+	}
+	if len(mpq.queue)-startIdx <= i {
 		return false
 	}
+	if useStartIdx {
+		mpq.startIdx = 0
+	}
 	defer func() { go mpq.updateView() }()
-	mpq.queue = mpq.queue[i:]
+	mpq.queue = mpq.queue[i+startIdx:]
 	return true
 }
 

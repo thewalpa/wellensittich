@@ -36,6 +36,12 @@ func (ic *InteractionContext) DeferAnswer() error {
 	})
 }
 
+func (ic *InteractionContext) NoAnswer() error {
+	return ic.Session.InteractionRespond(ic.Interaction.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseDeferredMessageUpdate,
+	})
+}
+
 // if you deferred your answer before use this to update your answer
 func (ic *InteractionContext) UpdateAnswer(message string) error {
 	_, err := ic.Session.InteractionResponseEdit(ic.Interaction.Interaction, &discordgo.WebhookEdit{

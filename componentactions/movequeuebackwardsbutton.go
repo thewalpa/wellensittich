@@ -2,14 +2,13 @@ package componentactions
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/thewalpa/wellensittich/discordws"
 	"github.com/thewalpa/wellensittich/util"
 )
 
-func (cID customID) queueButtonActionHandler(s *discordws.WellensittichSession, i *discordgo.InteractionCreate) {
+func (cID customID) moveQueueViewBackwardsButtonHandler(s *discordws.WellensittichSession, i *discordgo.InteractionCreate) {
 	ic := util.InteractionContext{Session: s.Session, Interaction: i}
 
 	g, err := s.State.Guild(i.GuildID)
@@ -36,27 +35,18 @@ func (cID customID) queueButtonActionHandler(s *discordws.WellensittichSession, 
 		return
 	}
 
-	playStr := cID[len(cID)-1]
-	playNum, err := strconv.Atoi(string(playStr))
-	if err != nil {
-		err = ic.DefaulInteractionAnswer("Unexpected error.")
+	wspq := s.GetPlayQueue(g.ID)
+	mok := wspq.MoveQueueViewBackwards()
+	if !mok {
+		err = ic.DefaulInteractionAnswer("Not possible to move backwards.")
 		if err != nil {
 			fmt.Printf("queueButtonAction: Error responding to interaction: %v\n", err)
 		}
 		return
 	}
 
-	wspq := s.GetPlayQueue(g.ID)
-	startIdx := wspq.GetStartIdx()
-	err = vc.VoiceSender.SkipTo(playNum, true)
-	message := fmt.Sprintf("Successfully skipped to the %d. play.", playNum+1+startIdx)
-	// we can't skip there, so display current queue and show new buttons
+	err = ic.NoAnswer()
 	if err != nil {
-		message = "The queue is not long enough anymore. Try again!"
-	}
-
-	err = ic.DefaulInteractionAnswer(message)
-	if err != nil {
-		fmt.Println("queueButtonAction:", err)
+		fmt.Printf("queueButtonAction: Error responding to interaction: %v\n", err)
 	}
 }

@@ -34,19 +34,24 @@ func (pq *PlayQueueView) Update(pqm *PlayQueue) {
 	messageEdit := discordgo.NewMessageEdit(pq.ChannelID, pq.MessageID)
 	message.Content = "Hier könnte Ihre Werbung stehen!"
 	messageEdit.SetContent(message.Content)
-	queueInfo, queueLen := pqm.GetQueueInfo(11)
+	queueInfo, queueLen := pqm.GetQueueInfo(11, true)
 	if len(queueInfo) != 0 {
+		startIdx := pqm.GetStartIdx()
 		// get buttIDs from helper function
 		buttIDs := util.QueueButtonsCustomIDs()
 		// create button labels 1 to n
 		buttLabels := make([]string, len(queueInfo)-1)
 		for i := range len(buttLabels) {
-			buttLabels[i] = strconv.Itoa(i + 1)
+			buttLabels[i] = strconv.Itoa(i + 1 + startIdx)
 		}
 		sb := strings.Builder{}
 		sb.WriteString("The current queue:\n")
 		for i, play := range queueInfo {
-			sb.WriteString(fmt.Sprintf("%d: %s\n", i, play))
+			idx := i
+			if idx != 0 {
+				idx += startIdx
+			}
+			sb.WriteString(fmt.Sprintf("%d: %s\n", idx, play))
 		}
 		if queueLen > len(queueInfo) {
 			sb.WriteString(fmt.Sprintf("and %d more...", queueLen-len(queueInfo)))
@@ -54,6 +59,21 @@ func (pq *PlayQueueView) Update(pqm *PlayQueue) {
 		queueEmbed := pq.queueEmbed((sb.String()))
 		messageEdit.SetEmbeds([]*discordgo.MessageEmbed{&queueEmbed})
 		messageEdit.Components = util.ActionRowComps(buttLabels, buttIDs[:len(buttLabels)])
+		audioControlButtons := discordgo.ActionsRow{
+			Components: []discordgo.MessageComponent{
+				discordgo.Button{
+					CustomID: util.QUEUE_BACKWARDS_CID,
+					Style:    discordgo.SecondaryButton,
+					Emoji:    &discordgo.ComponentEmoji{Name: "◀️"},
+				},
+				discordgo.Button{
+					CustomID: util.QUEUE_FORWARDS_CID,
+					Style:    discordgo.SecondaryButton,
+					Emoji:    &discordgo.ComponentEmoji{Name: "▶️"},
+				},
+			},
+		}
+		*messageEdit.Components = append(*messageEdit.Components, audioControlButtons)
 	} else {
 		messageEdit.SetEmbeds([]*discordgo.MessageEmbed{})
 	}

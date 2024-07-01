@@ -16,7 +16,21 @@ type WellensittichComponentAction struct {
 func ComponentActions() []*WellensittichComponentAction {
 	componentActions := []*WellensittichComponentAction{}
 	componentActions = append(componentActions, queueSkipButtonActions()...)
+	componentActions = append(componentActions, moveQueueButtonActions()...)
 	return componentActions
+}
+
+func moveQueueButtonActions() []*WellensittichComponentAction {
+	return []*WellensittichComponentAction{
+		{
+			CustomID: util.QUEUE_BACKWARDS_CID,
+			Handler:  customID(util.QUEUE_BACKWARDS_CID).moveQueueViewBackwardsButtonHandler,
+		},
+		{
+			CustomID: util.QUEUE_FORWARDS_CID,
+			Handler:  customID(util.QUEUE_FORWARDS_CID).moveQueueViewForwardsButtonHandler,
+		},
+	}
 }
 
 func queueSkipButtonActions() []*WellensittichComponentAction {

@@ -2,6 +2,9 @@ package util
 
 import "strconv"
 
+const QUEUE_BACKWARDS_CID = "queue_backwards"
+const QUEUE_FORWARDS_CID = "queue_forwards"
+
 // code to make sure component custom IDs are always the same
 
 func QueueButtonsCustomIDs() []string {

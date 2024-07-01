@@ -62,8 +62,8 @@ func (vs *VoiceSender) RemovePlay(i int) error {
 }
 
 // skips play and continues with nth play in queue
-func (vs *VoiceSender) SkipTo(n int) error {
-	if !vs.playQueue.DiscardTo(n) {
+func (vs *VoiceSender) SkipTo(n int, useStartIdx bool) error {
+	if !vs.playQueue.DiscardTo(n, useStartIdx) {
 		return fmt.Errorf("queue not long enough")
 	}
 	vs.SkipPlay()
