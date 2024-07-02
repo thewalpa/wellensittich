@@ -59,18 +59,31 @@ func (pq *PlayQueueView) Update(pqm *PlayQueue) {
 		queueEmbed := pq.queueEmbed((sb.String()))
 		messageEdit.SetEmbeds([]*discordgo.MessageEmbed{&queueEmbed})
 		messageEdit.Components = util.ActionRowComps(buttLabels, buttIDs[:len(buttLabels)])
+		pauseResume := discordgo.Button{
+			CustomID: util.QUEUE_PAUSE_CID,
+			Style:    discordgo.SecondaryButton,
+			Emoji:    &discordgo.ComponentEmoji{Name: "⏸️"},
+		}
+		if pqm.IsPaused() {
+			pauseResume = discordgo.Button{
+				CustomID: util.QUEUE_RESUME_CID,
+				Style:    discordgo.SecondaryButton,
+				Emoji:    &discordgo.ComponentEmoji{Name: "▶️"},
+			}
+		}
 		audioControlButtons := discordgo.ActionsRow{
 			Components: []discordgo.MessageComponent{
 				discordgo.Button{
 					CustomID: util.QUEUE_BACKWARDS_CID,
 					Style:    discordgo.SecondaryButton,
-					Emoji:    &discordgo.ComponentEmoji{Name: "◀️"},
+					Emoji:    &discordgo.ComponentEmoji{Name: "⬆️"},
 				},
 				discordgo.Button{
 					CustomID: util.QUEUE_FORWARDS_CID,
 					Style:    discordgo.SecondaryButton,
-					Emoji:    &discordgo.ComponentEmoji{Name: "▶️"},
+					Emoji:    &discordgo.ComponentEmoji{Name: "⬇️"},
 				},
+				pauseResume,
 			},
 		}
 		*messageEdit.Components = append(*messageEdit.Components, audioControlButtons)

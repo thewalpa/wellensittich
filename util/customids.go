@@ -4,6 +4,8 @@ import "strconv"
 
 const QUEUE_BACKWARDS_CID = "queue_backwards"
 const QUEUE_FORWARDS_CID = "queue_forwards"
+const QUEUE_PAUSE_CID = "queue_pause"
+const QUEUE_RESUME_CID = "queue_resume"
 
 // code to make sure component custom IDs are always the same
 

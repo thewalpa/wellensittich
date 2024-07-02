@@ -17,7 +17,21 @@ func ComponentActions() []*WellensittichComponentAction {
 	componentActions := []*WellensittichComponentAction{}
 	componentActions = append(componentActions, queueSkipButtonActions()...)
 	componentActions = append(componentActions, moveQueueButtonActions()...)
+	componentActions = append(componentActions, pauseResumeButtonActions()...)
 	return componentActions
+}
+
+func pauseResumeButtonActions() []*WellensittichComponentAction {
+	return []*WellensittichComponentAction{
+		{
+			CustomID: util.QUEUE_PAUSE_CID,
+			Handler:  pauseButtonHandler,
+		},
+		{
+			CustomID: util.QUEUE_RESUME_CID,
+			Handler:  resumeButtonHandler,
+		},
+	}
 }
 
 func moveQueueButtonActions() []*WellensittichComponentAction {

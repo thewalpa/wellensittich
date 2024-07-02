@@ -18,6 +18,7 @@ type PlayQueueModel struct {
 	queue       []*Play
 	currentPlay *Play
 	startIdx    int
+	paused      bool
 }
 
 func NewPlayQueueModel(guildID string, wss *WellensittichSession) *PlayQueue {
@@ -31,6 +32,12 @@ func (mpq *PlayQueue) GetStartIdx() int {
 	mpq.mu.Lock()
 	defer mpq.mu.Unlock()
 	return mpq.startIdx
+}
+
+func (mpq *PlayQueue) IsPaused() bool {
+	mpq.mu.Lock()
+	defer mpq.mu.Unlock()
+	return mpq.paused
 }
 
 func (mpq *PlayQueue) GetCurrentPlay() *Play {
