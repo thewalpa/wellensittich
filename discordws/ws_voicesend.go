@@ -74,6 +74,7 @@ func (vs *VoiceSender) SkipTo(n int, useStartIdx bool) error {
 func (vs *VoiceSender) PausePlaying() {
 	select {
 	case vs.paused <- true:
+		vs.playQueue.SetPaused(true)
 	default:
 	}
 }
@@ -82,6 +83,7 @@ func (vs *VoiceSender) PausePlaying() {
 func (vs *VoiceSender) ResumePlaying() {
 	select {
 	case vs.resume <- true:
+		vs.playQueue.SetPaused(false)
 	default:
 	}
 }

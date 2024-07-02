@@ -40,6 +40,13 @@ func (mpq *PlayQueue) IsPaused() bool {
 	return mpq.paused
 }
 
+func (mpq *PlayQueue) SetPaused(paused bool) {
+	mpq.mu.Lock()
+	mpq.paused = paused
+	mpq.mu.Unlock()
+	mpq.updateView()
+}
+
 func (mpq *PlayQueue) GetCurrentPlay() *Play {
 	mpq.mu.Lock()
 	defer mpq.mu.Unlock()
@@ -48,9 +55,9 @@ func (mpq *PlayQueue) GetCurrentPlay() *Play {
 
 func (mpq *PlayQueue) SetCurrentPlay(currentPlay *Play) {
 	mpq.mu.Lock()
-	defer mpq.mu.Unlock()
 	mpq.currentPlay = currentPlay
-	go mpq.updateView()
+	mpq.mu.Unlock()
+	mpq.updateView()
 }
 
 func (mpq *PlayQueue) MoveQueueViewForwards() bool {
