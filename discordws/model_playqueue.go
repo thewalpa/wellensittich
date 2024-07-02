@@ -90,7 +90,7 @@ func (mpq *PlayQueue) updateView() {
 		return
 	}
 	mpq.mu.Lock()
-	for len(mpq.queue) < mpq.startIdx {
+	for len(mpq.queue) <= mpq.startIdx {
 		mpq.startIdx -= 10
 	}
 	mpq.mu.Unlock()
