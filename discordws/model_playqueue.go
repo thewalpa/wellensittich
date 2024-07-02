@@ -89,6 +89,11 @@ func (mpq *PlayQueue) updateView() {
 	if mpq.View == nil {
 		return
 	}
+	mpq.mu.Lock()
+	for len(mpq.queue) < mpq.startIdx {
+		mpq.startIdx -= 10
+	}
+	mpq.mu.Unlock()
 	mpq.View.Update(mpq)
 }
 
@@ -100,11 +105,13 @@ func (mpq *PlayQueue) GetQueueInfo(limit int, useStartIdx bool) ([]util.PlayInfo
 		startIdx = mpq.startIdx
 	}
 	info := []util.PlayInfo{}
-	for i, p := range mpq.queue[startIdx:] {
-		if i+1 == limit {
-			break
+	if startIdx < len(mpq.queue) {
+		for i, p := range mpq.queue[startIdx:] {
+			if i+1 == limit {
+				break
+			}
+			info = append(info, p.PlayInfo)
 		}
-		info = append(info, p.PlayInfo)
 	}
 	size := len(mpq.queue) - startIdx
 	if mpq.currentPlay != nil {
