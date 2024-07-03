@@ -37,6 +37,7 @@ type WellensittichSession struct {
 	// commandMap
 	commandMap         map[string]func(wss *WellensittichSession, i *discordgo.InteractionCreate)
 	componentActionMap map[string]func(wss *WellensittichSession, i *discordgo.InteractionCreate)
+	modalSubmitMap     map[string]func(wss *WellensittichSession, i *discordgo.InteractionCreate)
 
 	guildFeatureConfigs map[string]*guildFeatureConfig
 	guildFeatures       map[string]WSGuildFeature
@@ -75,10 +76,12 @@ func NewWellensittichSession(s *discordgo.Session, wsc config.WellensittichConfi
 // Init the session handlers, needs information from main
 func (wss *WellensittichSession) InitSession(
 	commandMap map[string]func(wss *WellensittichSession, i *discordgo.InteractionCreate),
-	componentActionMap map[string]func(wss *WellensittichSession, i *discordgo.InteractionCreate)) {
+	componentActionMap map[string]func(wss *WellensittichSession, i *discordgo.InteractionCreate),
+	modalSubmitMap map[string]func(wss *WellensittichSession, i *discordgo.InteractionCreate)) {
 
 	wss.commandMap = commandMap
 	wss.componentActionMap = componentActionMap
+	wss.modalSubmitMap = modalSubmitMap
 	wss.AddHandler(wss.interactionCreateEventHandler)
 	wss.AddHandler(wss.voiceStateUpdateEventHandler)
 }

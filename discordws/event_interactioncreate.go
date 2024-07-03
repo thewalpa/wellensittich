@@ -20,5 +20,11 @@ func (wss *WellensittichSession) interactionCreateEventHandler(s *discordgo.Sess
 		} else {
 			fmt.Println("The component customID does not exist.", i.MessageComponentData().CustomID)
 		}
+	case discordgo.InteractionModalSubmit:
+		if h, ok := wss.modalSubmitMap[i.ModalSubmitData().CustomID]; ok {
+			h(wss, i)
+		} else {
+			fmt.Println("The modalsubmit customID does not exist.", i.ModalSubmitData().CustomID)
+		}
 	}
 }

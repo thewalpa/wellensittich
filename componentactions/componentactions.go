@@ -17,11 +17,25 @@ func ComponentActions() []*WellensittichComponentAction {
 	componentActions := []*WellensittichComponentAction{}
 	componentActions = append(componentActions, queueSkipButtonActions()...)
 	componentActions = append(componentActions, moveQueueButtonActions()...)
-	componentActions = append(componentActions, pauseResumeButtonActions()...)
+	componentActions = append(componentActions, queueControlButtonActions()...)
 	return componentActions
 }
 
-func pauseResumeButtonActions() []*WellensittichComponentAction {
+type WellensittichModalSubmit struct {
+	CustomID string
+	Handler  func(s *discordws.WellensittichSession, i *discordgo.InteractionCreate)
+}
+
+func ModalSubmitActions() []*WellensittichModalSubmit {
+	return []*WellensittichModalSubmit{
+		{
+			CustomID: util.QUEUE_SKIPTO_MODAL_CID,
+			Handler:  skipToModalHandler,
+		},
+	}
+}
+
+func queueControlButtonActions() []*WellensittichComponentAction {
 	return []*WellensittichComponentAction{
 		{
 			CustomID: util.QUEUE_PAUSE_CID,
@@ -30,6 +44,18 @@ func pauseResumeButtonActions() []*WellensittichComponentAction {
 		{
 			CustomID: util.QUEUE_RESUME_CID,
 			Handler:  resumeButtonHandler,
+		},
+		{
+			CustomID: util.QUEUE_SKIP_CID,
+			Handler:  skipButtonHandler,
+		},
+		{
+			CustomID: util.QUEUE_SKIPTO_CID,
+			Handler:  skipToButtonHandler,
+		},
+		{
+			CustomID: util.QUEUE_STOP_CID,
+			Handler:  stopButtonHandler,
 		},
 	}
 }

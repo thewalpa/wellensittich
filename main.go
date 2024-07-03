@@ -66,9 +66,15 @@ func main() {
 	for _, v := range componentActions {
 		componentActionMap[v.CustomID] = v.Handler
 	}
+	// Collect modal submits
+	modalSubmits := componentactions.ModalSubmitActions()
+	modalSubmitsMap := make(map[string]func(wss *discordws.WellensittichSession, i *discordgo.InteractionCreate), len(componentActions))
+	for _, v := range modalSubmits {
+		modalSubmitsMap[v.CustomID] = v.Handler
+	}
 
 	// Init WellenSittichSession with the collected commands
-	wss.InitSession(commandMap, componentActionMap)
+	wss.InitSession(commandMap, componentActionMap, modalSubmitsMap)
 
 	// end program when keyboard interrupt
 	sc := make(chan os.Signal, 1)
